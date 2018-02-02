@@ -21,7 +21,7 @@ func main() {
 	defer sdl.Quit()
 
 	window, err := sdl.CreateWindow("raster", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED,
-		WIDTH, HEIGHT, sdl.WINDOW_SHOWN)
+		WIDTH, HEIGHT, sdl.WINDOW_SHOWN|sdl.WINDOW_RESIZABLE)
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +39,7 @@ func main() {
 	}
 	defer texture.Destroy()
 
-	localObj := MakeObject(QUAD_MESH)
+	localObj := MakeObject(CUBE_MESH)
 	localObj.Transform.Position = Vec3{0, 0, 0}
 
 	camera := Camera{
@@ -50,8 +50,8 @@ func main() {
 		Pitch:      0,
 		Near:       0.1,
 		Far:        100,
-		Width:      6,
-		Height:     6,
+		Width:      12.8,
+		Height:     7.2,
 		Projection: PROJ_ORTHO,
 	}
 
@@ -76,6 +76,8 @@ func main() {
 		}
 		prevT = t
 		camera.Position.X = float32(math.Sin(float64(t) / 400.0))
+		tt := float32(t) / 550.0
+		localObj.Transform.Rotation = FromEuler(tt, tt, tt)
 
 		raster.Clear()
 

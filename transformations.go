@@ -8,10 +8,11 @@ type Mat44 [4][4]float32
  * 0       0       0       1
  */
 func MakeModelMatrix(t Transform) Mat44 {
+	q := t.Rotation
 	return Mat44{
-		[4]float32{1, 0, 0, t.Position.X},
-		[4]float32{0, 1, 0, t.Position.Y},
-		[4]float32{0, 0, 1, t.Position.Z},
+		[4]float32{1 - 2*q.C*q.C - 2*q.D*q.D, 2*q.B*q.C - 2*q.D*q.A, 2*q.B*q.D + 2*q.C*q.A, t.Position.X},
+		[4]float32{2*q.B*q.C + 2*q.D*q.A, 1 - 2*q.B*q.B - 2*q.D*q.D, 2*q.C*q.D - 2*q.B*q.A, t.Position.Y},
+		[4]float32{2*q.B*q.D - 2*q.C*q.A, 2*q.C*q.D + 2*q.B*q.A, 1 - 2*q.B*q.B - 2*q.C*q.C, t.Position.Z},
 		[4]float32{0, 0, 0, 1},
 	}
 }
@@ -79,6 +80,29 @@ func Orthographic(left, right, bottom, top, near, far float32) Mat44 {
 	ret[2][2] = -2 / (far - near)
 	ret[2][3] = -(far + near) / (far - near)
 	ret[3][3] = 1
+
+	return ret
+}
+
+func Perspective(left, right, bottom, top, near, far float32) Mat44 {
+	if right-left == 0 {
+		panic("Orthographic: right == left!")
+	}
+	if top-bottom == 0 {
+		panic("Orthographic: top == bottom!")
+	}
+	if near-far == 0 {
+		panic("Orthographic: near == far!")
+	}
+	ret := Mat44Zero()
+
+	ret[0][0] = (2 * near) / (right - left)
+	ret[0][2] = (right + left) / (right - left)
+	ret[1][1] = (2 * near) / (top - bottom)
+	ret[1][2] = (top + bottom) / (top - bottom)
+	ret[2][2] = -(far + near) / (far - near)
+	ret[2][3] = -(2 * far * near) / (far - near)
+	ret[3][2] = -1
 
 	return ret
 }

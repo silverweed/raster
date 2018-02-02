@@ -164,3 +164,20 @@ func (m Mat44) Inverse() Mat44 {
 				m[0][0]*m[1][2]*m[2][1] - m[0][1]*m[1][0]*m[2][2] - m[0][2]*m[1][1]*m[2][0]) * d},
 	}
 }
+
+// inputs in degrees
+func FromEuler(yaw, pitch, roll float32) Quat {
+	cy := float32(math.Cos(float64(yaw * 0.5)))
+	sy := float32(math.Sin(float64(yaw * 0.5)))
+	cr := float32(math.Cos(float64(roll * 0.5)))
+	sr := float32(math.Sin(float64(roll * 0.5)))
+	cp := float32(math.Cos(float64(pitch * 0.5)))
+	sp := float32(math.Sin(float64(pitch * 0.5)))
+
+	return Quat{
+		cy*cr*cp + sy*sr*sp,
+		cy*sr*cp - sy*cr*sp,
+		cy*cr*sp + sy*sr*cp,
+		sy*cr*cp - cy*sr*sp,
+	}
+}

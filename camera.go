@@ -57,10 +57,11 @@ func LookAt(eye, target, up Vec3) Mat44 {
 }
 
 func (c Camera) ProjMatrix() Mat44 {
-	//if c.Projection == PROJ_PERSP {
-	//return Perspective(c.Width, c.Height, c.Fov, c.Near, c.Far)
-	//} else {
-	return Orthographic(-c.Width/2, c.Width/2,
-		-c.Height/2, c.Height/2, c.Near, c.Far)
-	//}
+	if c.Projection == PROJ_PERSP {
+		return Perspective(-c.Width/2, c.Width/2,
+			-c.Height/2, c.Height/2, c.Near, c.Far)
+	} else {
+		return Orthographic(-c.Width/2, c.Width/2,
+			-c.Height/2, c.Height/2, c.Near, c.Far)
+	}
 }
