@@ -12,6 +12,7 @@ const HEIGHT = 720
 const PI = 3.1415
 
 var quit = false
+var raster Raster
 
 func main() {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
@@ -54,7 +55,7 @@ func main() {
 		Projection: PROJ_ORTHO,
 	}
 
-	raster := Raster{
+	raster = Raster{
 		Pixels:        make([]byte, 4*WIDTH*HEIGHT),
 		W:             WIDTH,
 		H:             HEIGHT,
@@ -75,7 +76,6 @@ func main() {
 		}
 		prevT = t
 		camera.Position.X = float32(math.Sin(float64(t) / 400.0))
-		fmt.Printf("cameraX = %f\n", camera.Position.X)
 
 		raster.Clear()
 
@@ -107,6 +107,8 @@ func processInput() {
 				switch event.Keysym.Sym {
 				case sdl.K_q:
 					quit = true
+				case sdl.K_w:
+					raster.Options.Wireframe = !raster.Options.Wireframe
 				}
 			}
 		case *sdl.QuitEvent:
