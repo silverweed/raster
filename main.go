@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -25,10 +26,17 @@ func main() {
 	}
 	defer window.Destroy()
 
-	surface, err := window.GetSurface()
+	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
 	if err != nil {
 		panic(err)
 	}
+	defer renderer.Destroy()
+
+	texture, err := renderer.CreateTexture(sdl.PIXELFORMAT_ARGB8888, sdl.TEXTUREACCESS_STATIC, WIDTH, HEIGHT)
+	if err != nil {
+		panic(err)
+	}
+	defer texture.Destroy()
 
 	localObj := MakeObject(QUAD_MESH)
 	localObj.Transform.Position = Vec3{0, 0, 0}
@@ -46,23 +54,46 @@ func main() {
 		Projection: PROJ_ORTHO,
 	}
 
+	raster := Raster{
+		Pixels:        make([]byte, 4*WIDTH*HEIGHT),
+		W:             WIDTH,
+		H:             HEIGHT,
+		BytesPerPixel: 4,
+	}
+
+	prevT := sdl.GetTicks()
+
 	for {
 		processInput()
 		if quit {
 			break
 		}
 
+		t := sdl.GetTicks()
+		if prevT != t {
+			fmt.Printf("Loop time = %d ms (FPS = %d)\n", t-prevT, 1000/(t-prevT))
+		}
+		prevT = t
+		camera.Position.X = float32(math.Sin(float64(t) / 400.0))
+		fmt.Printf("cameraX = %f\n", camera.Position.X)
+
+		raster.Clear()
+
+		//fmt.Printf("viewmat = %v\n", camera.ViewMatrix())
+
 		worldObj := LocalToWorld(localObj)
 		//fmt.Printf("Local: %v,\nWorld: %v\n", localObj.Mesh, worldObj)
 		viewObj := WorldToView(worldObj, camera.ViewMatrix())
 		//fmt.Printf("Local: %v,\nView: %v\n", localObj.Mesh, viewObj)
 		clipObj := ViewToClip(viewObj, camera.ProjMatrix())
-		fmt.Printf("Local: %v,\nClip: %v\n", localObj.Mesh, clipObj)
+		//fmt.Printf("Local: %v,\nClip: %v\n", localObj.Mesh, clipObj)
 
-		DrawObject(surface, clipObj)
+		raster.DrawObject(clipObj)
 
-		//surface.FillRect(&rect, 0xffff0000)
-		window.UpdateSurface()
+		renderer.Clear()
+		texture.Update(nil, raster.Pixels, WIDTH*4 /*4 = sizeof(uint32)*/)
+		renderer.Copy(texture, nil, nil)
+		renderer.Present()
 		sdl.Delay(1000 / 60)
 	}
 }

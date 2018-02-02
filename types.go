@@ -67,6 +67,10 @@ func Vec4to3(v Vec4) Vec3 {
 	return Vec3{v.X, v.Y, v.Z}
 }
 
+func Vec3to2(v Vec3) Vec2 {
+	return Vec2{v.X, v.Y}
+}
+
 func (v Vec3) Normalized() Vec3 {
 	norm := float32(math.Sqrt(float64(v.X*v.X + v.Y*v.Y + v.Z*v.Z)))
 	return Vec3{v.X / norm, v.Y / norm, v.Z / norm}
