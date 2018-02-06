@@ -1,5 +1,12 @@
 package main
 
+var TRIANGLE_MESH = Mesh{
+	[]Vertex{
+		Vertex{Vec3{0.5, -0.5, 0}},  /* vec3(0, 0, 1), vec2(1, 1) }*/
+		Vertex{Vec3{0, 0.5, 0}},     /* vec3(0, 0, 1), vec2(0, 1) }*/
+		Vertex{Vec3{-0.5, -0.5, 0}}, /* vec3(0, 0, 1), vec2(0, 0) }*/
+	},
+}
 var QUAD_MESH = Mesh{
 	[]Vertex{
 		Vertex{Vec3{0.5, 0.5, 0}},   /* vec3(0, 0, 1), vec2(1, 1) }*/

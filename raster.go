@@ -17,7 +17,7 @@ type Raster struct {
 	Options       RasterOptions
 }
 
-// TODO: Rasterize object's vertices and draw them
+// Rasterize object's vertices and draw them
 func (raster Raster) DrawObject(object Mesh) {
 	for i := 0; i < len(object.Vertices); i += 3 {
 		v1 := Vec3to2(object.Vertices[i].Position)
@@ -29,6 +29,7 @@ func (raster Raster) DrawObject(object Mesh) {
 		v1.Y = (v1.Y + 1) * float32(raster.H/2)
 		v2.Y = (v2.Y + 1) * float32(raster.H/2)
 		v3.Y = (v3.Y + 1) * float32(raster.H/2)
+		//fmt.Printf("Drawing triangle from %s, %s, %s\n", v1, v2, v3)
 		if raster.Options.Wireframe {
 			raster.DrawLine(v1, v2)
 			raster.DrawLine(v2, v3)
@@ -40,17 +41,21 @@ func (raster Raster) DrawObject(object Mesh) {
 }
 
 func (raster Raster) DrawLine(from, to Vec2) {
-	if from.X > to.X {
-		from.X, to.X = to.X, from.X
-	}
-	if from.Y > to.Y {
-		from.Y, to.Y = to.Y, from.Y
-	}
-	//fmt.Printf("drawing from %v to %v\n", from, to)
+	//fmt.Printf("Drawing line from %s to %s\n", from, to)
+	// TODO: pass as vertex attributes
+	var (
+		startcol uint32 = 0xff0000
+		endcol   uint32 = 0x0000ff
+	)
 	dx := to.X - from.X
 	if dx == 0 {
+		if from.Y > to.Y {
+			from.Y, to.Y = to.Y, from.Y
+		}
 		for y := from.Y; y <= to.Y; y++ {
-			raster.SetPixel(int32(from.X), int32(y), 0xffffffff)
+			t := (y - from.Y) / (to.Y - from.Y)
+			color := LerpColor(startcol, endcol, t)
+			raster.SetPixel(int32(from.X), int32(y), color)
 		}
 		return
 	}
@@ -58,16 +63,35 @@ func (raster Raster) DrawLine(from, to Vec2) {
 	derr := math.Abs(float64(dy / dx))
 	err := 0.0
 	y := from.Y
-	for x := from.X; x <= to.X; x++ {
-		raster.SetPixel(int32(x), int32(y), 0xffffffff)
-		err = err + derr
-		for err >= 0.5 {
-			if dy > 0 {
-				y++
-			} else if dy < 0 {
-				y--
+	if from.X < to.X {
+		for x := from.X; x <= to.X; x++ {
+			t := (x - from.X) / (to.X - from.X)
+			color := LerpColor(startcol, endcol, t)
+			raster.SetPixel(int32(x), int32(y), color)
+			err = err + derr
+			for err >= 0.5 {
+				if dy > 0 {
+					y++
+				} else if dy < 0 {
+					y--
+				}
+				err = err - 1.0
 			}
-			err = err - 1.0
+		}
+	} else {
+		for x := from.X; x >= to.X; x-- {
+			t := (x - from.X) / (to.X - from.X)
+			color := LerpColor(startcol, endcol, t)
+			raster.SetPixel(int32(x), int32(y), color)
+			err = err + derr
+			for err >= 0.5 {
+				if dy > 0 {
+					y++
+				} else if dy < 0 {
+					y--
+				}
+				err = err - 1.0
+			}
 		}
 	}
 }
@@ -149,4 +173,15 @@ func (raster Raster) drawFlagTopTriangle(v1, v2, v3 Vec2) {
 		curx1 -= invslope1
 		curx2 -= invslope2
 	}
+}
+
+func Lerp(from, to uint32, t float32) uint32 {
+	return uint32((1.0-t)*float32(from) + t*float32(to))
+}
+
+func LerpColor(startcol, endcol uint32, t float32) uint32 {
+	startred, endred := (startcol>>16)&0xff, (endcol>>16)&0xff
+	startgreen, endgreen := (startcol>>8)&0xff, (endcol>>8)&0xff
+	startblue, endblue := startcol&0xff, endcol&0xff
+	return 0xFF<<24 | Lerp(startred, endred, t)<<16 | Lerp(startgreen, endgreen, t)<<8 | Lerp(startblue, endblue, t)
 }

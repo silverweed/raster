@@ -13,6 +13,13 @@ const PI = 3.1415
 
 var quit = false
 var raster Raster
+var camera *Camera
+var paused = true
+var (
+	yaw   float32 = 0.0
+	pitch float32 = 0.0
+	roll  float32 = 0.0
+)
 
 func main() {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
@@ -42,16 +49,16 @@ func main() {
 	localObj := MakeObject(CUBE_MESH)
 	localObj.Transform.Position = Vec3{0, 0, 0}
 
-	camera := Camera{
+	camera = &Camera{
 		Position:   Vec3{0, 0, 1},
 		Up:         Vec3{0, 1, 0},
 		Fov:        PI,
 		Yaw:        -PI / 2,
 		Pitch:      0,
 		Near:       0.1,
-		Far:        100,
-		Width:      12.8,
-		Height:     7.2,
+		Far:        10,
+		Width:      12.8 / 2,
+		Height:     7.2 / 2,
 		Projection: PROJ_ORTHO,
 	}
 
@@ -71,13 +78,17 @@ func main() {
 		}
 
 		t := sdl.GetTicks()
-		if prevT != t {
-			fmt.Printf("Loop time = %d ms (FPS = %d)\n", t-prevT, 1000/(t-prevT))
+		if !paused {
+			if prevT != t {
+				fmt.Printf("Loop time = %d ms (FPS = %d)\n", t-prevT, 1000/(t-prevT))
+			}
+			prevT = t
+			camera.Position.X = float32(math.Sin(float64(t) / 400.0))
+			yaw = float32(t) / 550.0
+			pitch = yaw
+			roll = pitch
 		}
-		prevT = t
-		camera.Position.X = float32(math.Sin(float64(t) / 400.0))
-		tt := float32(t) / 550.0
-		localObj.Transform.Rotation = FromEuler(tt, tt, tt)
+		localObj.Transform.Rotation = FromEuler(roll, pitch, yaw)
 
 		raster.Clear()
 
@@ -96,6 +107,11 @@ func main() {
 		texture.Update(nil, raster.Pixels, WIDTH*4 /*4 = sizeof(uint32)*/)
 		renderer.Copy(texture, nil, nil)
 		renderer.Present()
+		if t%10 == 0 {
+			mx, my, _ := sdl.GetMouseState()
+			fmt.Printf("Coords: (%d, %d)\n", mx, my)
+		}
+
 		sdl.Delay(1000 / 60)
 	}
 }
@@ -111,6 +127,22 @@ func processInput() {
 					quit = true
 				case sdl.K_w:
 					raster.Options.Wireframe = !raster.Options.Wireframe
+				case sdl.K_p:
+					paused = !paused
+				case sdl.K_o:
+					if camera.Projection == PROJ_ORTHO {
+						camera.Projection = PROJ_PERSP
+					} else {
+						camera.Projection = PROJ_ORTHO
+					}
+				case sdl.K_RIGHT:
+					yaw += 0.1
+				case sdl.K_LEFT:
+					yaw -= 0.1
+				case sdl.K_UP:
+					pitch -= 0.1
+				case sdl.K_DOWN:
+					pitch += 0.1
 				}
 			}
 		case *sdl.QuitEvent:

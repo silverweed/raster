@@ -1,6 +1,9 @@
 package main
 
-import "math"
+import (
+	"fmt"
+	"math"
+)
 
 type Vec2 struct {
 	X float32
@@ -180,4 +183,8 @@ func FromEuler(yaw, pitch, roll float32) Quat {
 		cy*cr*sp + sy*sr*cp,
 		sy*cr*cp - cy*sr*sp,
 	}
+}
+
+func (v Vec2) String() string {
+	return fmt.Sprintf("(%d, %d)", int(v.X), int(v.Y))
 }
