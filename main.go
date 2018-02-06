@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -46,8 +45,10 @@ func main() {
 	}
 	defer texture.Destroy()
 
-	localObj := MakeObject(CUBE_MESH)
+	//localObj := makeRGBTriangle()
+	localObj := makeRGBCube()
 	localObj.Transform.Position = Vec3{0, 0, 0}
+	roll = 0.1
 
 	camera = &Camera{
 		Position:   Vec3{0, 0, 1},
@@ -83,12 +84,12 @@ func main() {
 				fmt.Printf("Loop time = %d ms (FPS = %d)\n", t-prevT, 1000/(t-prevT))
 			}
 			prevT = t
-			camera.Position.X = float32(math.Sin(float64(t) / 400.0))
-			yaw = float32(t) / 550.0
-			pitch = yaw
-			roll = pitch
+			//camera.Position.X = float32(math.Sin(float64(t) / 400.0))
+			pitch = float32(t) / 550.0
+			//pitch = yaw
+			//roll = pitch
 		}
-		localObj.Transform.Rotation = FromEuler(roll, pitch, yaw)
+		localObj.Transform.Rotation = FromEuler(yaw, pitch, roll)
 
 		raster.Clear()
 
@@ -107,10 +108,10 @@ func main() {
 		texture.Update(nil, raster.Pixels, WIDTH*4 /*4 = sizeof(uint32)*/)
 		renderer.Copy(texture, nil, nil)
 		renderer.Present()
-		if t%10 == 0 {
-			mx, my, _ := sdl.GetMouseState()
-			fmt.Printf("Coords: (%d, %d)\n", mx, my)
-		}
+		//if t%10 == 0 {
+		//mx, my, _ := sdl.GetMouseState()
+		//fmt.Printf("Coords: (%d, %d)\n", mx, my)
+		//}
 
 		sdl.Delay(1000 / 60)
 	}
@@ -149,4 +150,22 @@ func processInput() {
 			quit = true
 		}
 	}
+}
+
+func makeRGBTriangle() Object {
+	t := MakeObject(TRIANGLE_MESH)
+	t.Vertices[0].Color = 0xff0000
+	t.Vertices[1].Color = 0x00ff00
+	t.Vertices[2].Color = 0x0000ff
+	return t
+}
+
+func makeRGBCube() Object {
+	c := MakeObject(CUBE_MESH)
+	for i := 0; i < len(c.Vertices); i += 3 {
+		c.Vertices[i+0].Color = 0xff0000
+		c.Vertices[i+1].Color = 0x00ff00
+		c.Vertices[i+2].Color = 0x0000ff
+	}
+	return c
 }

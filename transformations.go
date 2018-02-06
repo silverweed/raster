@@ -32,7 +32,10 @@ func LocalToWorld(obj Object) Mesh {
 	worldVertices := make([]Vertex, len(obj.Vertices))
 	for i, v := range obj.Vertices {
 		p := v.Position
-		worldVertices[i] = Vertex{Vec4to3(MulMatVec4(modelMat, Vec4{p.X, p.Y, p.Z, 1.0}))}
+		worldVertices[i] = Vertex{
+			Position: Vec4to3(MulMatVec4(modelMat, Vec4{p.X, p.Y, p.Z, 1.0})),
+			Color:    v.Color,
+		}
 	}
 	return Mesh{worldVertices}
 }
@@ -41,7 +44,10 @@ func WorldToView(obj Mesh, viewMat Mat44) Mesh {
 	viewVertices := make([]Vertex, len(obj.Vertices))
 	for i, v := range obj.Vertices {
 		p := v.Position
-		viewVertices[i] = Vertex{Vec4to3(MulMatVec4(viewMat, Vec4{p.X, p.Y, p.Z, 1.0}))}
+		viewVertices[i] = Vertex{
+			Position: Vec4to3(MulMatVec4(viewMat, Vec4{p.X, p.Y, p.Z, 1.0})),
+			Color:    v.Color,
+		}
 	}
 	return Mesh{viewVertices}
 }
@@ -51,11 +57,14 @@ func ViewToClip(obj Mesh, projMat Mat44) Mesh {
 	for i, v := range obj.Vertices {
 		p := v.Position
 		cp := MulMatVec4(projMat, Vec4{p.X, p.Y, p.Z, 1.0})
-		projVertices[i] = Vertex{Vec3{
-			cp.X / cp.W,
-			cp.Y / cp.W,
-			cp.Z / cp.W,
-		}}
+		projVertices[i] = Vertex{
+			Position: Vec3{
+				cp.X / cp.W,
+				cp.Y / cp.W,
+				cp.Z / cp.W,
+			},
+			Color: v.Color,
+		}
 		// TODO perform frustum clipping
 	}
 	return Mesh{projVertices}

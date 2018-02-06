@@ -49,9 +49,9 @@ func LookAt(eye, target, up Vec3) Mat44 {
 	nl := look_dir.Neg()
 	ret[2] = [4]float32{nl.X, nl.Y, nl.Z, 0}
 
-	ret[0][3] = -Dot(eye, right_dir)
-	ret[1][3] = -Dot(eye, perp_up_dir)
-	ret[2][3] = Dot(eye, look_dir)
+	ret[0][3] = -Dot3(eye, right_dir)
+	ret[1][3] = -Dot3(eye, perp_up_dir)
+	ret[2][3] = Dot3(eye, look_dir)
 
 	return ret
 }

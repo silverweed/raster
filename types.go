@@ -5,6 +5,8 @@ import (
 	"math"
 )
 
+type Color uint32
+
 type Vec2 struct {
 	X float32
 	Y float32
@@ -25,6 +27,7 @@ type Vec4 struct {
 
 type Vertex struct {
 	Position Vec3
+	Color    Color
 }
 
 type Mesh struct {
@@ -79,6 +82,14 @@ func (v Vec3) Normalized() Vec3 {
 	return Vec3{v.X / norm, v.Y / norm, v.Z / norm}
 }
 
+func (v Vec2) Add(v2 Vec2) Vec2 {
+	return Vec2{v.X + v2.X, v.Y + v2.Y}
+}
+
+func (v Vec2) Neg() Vec2 {
+	return Vec2{-v.X, -v.Y}
+}
+
 func (v Vec3) Add(v2 Vec3) Vec3 {
 	return Vec3{v.X + v2.X, v.Y + v2.Y, v.Z + v2.Z}
 }
@@ -93,7 +104,11 @@ func Cross(v1, v2 Vec3) Vec3 {
 		v1.X*v2.Y - v2.X*v1.Y}
 }
 
-func Dot(v1, v2 Vec3) float32 {
+func Dot2(v1, v2 Vec2) float32 {
+	return v1.X*v2.X + v1.Y*v2.Y
+}
+
+func Dot3(v1, v2 Vec3) float32 {
 	return v1.X*v2.X + v1.Y*v2.Y + v1.Z*v2.Z
 }
 
