@@ -58,17 +58,12 @@ func main() {
 		Pitch:      0,
 		Near:       0.1,
 		Far:        10,
-		Width:      12.8 / 2,
-		Height:     7.2 / 2,
+		Width:      12.8 / 4,
+		Height:     7.2 / 4,
 		Projection: PROJ_ORTHO,
 	}
 
-	raster = Raster{
-		Pixels:        make([]byte, 4*WIDTH*HEIGHT),
-		W:             WIDTH,
-		H:             HEIGHT,
-		BytesPerPixel: 4,
-	}
+	raster = NewRaster(WIDTH, HEIGHT)
 
 	prevT := sdl.GetTicks()
 
@@ -90,6 +85,7 @@ func main() {
 			//roll = pitch
 		}
 		localObj.Transform.Rotation = FromEuler(yaw, pitch, roll)
+		//localObj.Transform.Position.Z = 0.2*float32(math.Sin(float64(t/400.0))) - 0.5
 
 		raster.Clear()
 
@@ -136,6 +132,8 @@ func processInput() {
 					} else {
 						camera.Projection = PROJ_ORTHO
 					}
+				case sdl.K_d:
+					raster.Options.DrawDepth = !raster.Options.DrawDepth
 				case sdl.K_RIGHT:
 					yaw += 0.1
 				case sdl.K_LEFT:

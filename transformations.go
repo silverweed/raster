@@ -65,7 +65,17 @@ func ViewToClip(obj Mesh, projMat Mat44) Mesh {
 			},
 			Color: v.Color,
 		}
-		// TODO perform frustum clipping
+		// TODO perform proper frustum clipping
+		if projVertices[i].Position.X < -1.0 {
+			projVertices[i].Position.X = -1.0
+		} else if projVertices[i].Position.X > 1.0 {
+			projVertices[i].Position.X = 1.0
+		}
+		if projVertices[i].Position.Y < -1.0 {
+			projVertices[i].Position.Y = -1.0
+		} else if projVertices[i].Position.Y > 1.0 {
+			projVertices[i].Position.Y = 1.0
+		}
 	}
 	return Mesh{projVertices}
 }
